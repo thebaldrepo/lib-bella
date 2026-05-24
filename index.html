@@ -973,9 +973,21 @@ const SUPABASE_URL = 'https://kxpxzeyuiygiozpkhkny.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cHh6ZXl1aXlnaW96cGtoa255Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1OTkwOTgsImV4cCI6MjA5NTE3NTA5OH0.9vDusZ6e80nT2w3nVj0TUT3OggXn2hWGVh3jvMLGRkY';
 
 const COLORS=[
-  '#f2b8b8','#e8a0c0','#c8a8e8','#a8c4e8','#a8d8b8',
-  '#f0d4a0','#f5b8a0','#d4b8e8','#b8d8c8','#e8c8a8',
-  '#f0c0d0','#c8e0f0','#e0d4b0','#c4c8e0','#d0e0c0'
+  'linear-gradient(135deg,#fdd0b0,#f8b898)',
+  'linear-gradient(135deg,#fcd4b8,#f5b890)',
+  'linear-gradient(135deg,#fce0c8,#f5c4a0)',
+  'linear-gradient(135deg,#fde8d4,#f8d0b0)',
+  'linear-gradient(135deg,#f9d4a8,#f0b878)',
+  'linear-gradient(135deg,#fad0b0,#f0b488)',
+  'linear-gradient(135deg,#f8ccb4,#eea888)',
+  'linear-gradient(135deg,#fde0cc,#f8c8a8)',
+  'linear-gradient(135deg,#fcd8c0,#f5bca0)',
+  'linear-gradient(135deg,#fce8d0,#f8ccac)',
+  'linear-gradient(135deg,#e8d4f8,#d4b8ee)',
+  'linear-gradient(135deg,#c8daf8,#a8c4ee)',
+  'linear-gradient(135deg,#c8ecd8,#a8d8be)',
+  'linear-gradient(135deg,#f8e0c8,#f0c8a8)',
+  'linear-gradient(135deg,#f0e8c0,#e4d498)',
 ];
 
 let books=[
@@ -1397,19 +1409,21 @@ function openAdd(){
 function closeAdd(){document.getElementById('addOv').classList.remove('open')}
 function setCol(c){
   activeCl=c;
-  const isGradient=c&&c.startsWith('linear-gradient');
   const gSlot=document.getElementById('gradientSwatch');
-  if(isGradient){
-    // Show the preserved-gradient swatch and select it
+  // Check if c matches one of the standard COLORS swatches
+  const matchesStandard=COLORS.includes(c);
+  if(matchesStandard){
+    gSlot.style.display='none';
+    document.querySelectorAll('.sw-dot:not(#gradientSwatch)').forEach(s=>{
+      s.classList.toggle('on', s.style.background===c);
+    });
+  } else {
+    // Custom or legacy color — show preserved swatch
     gSlot.style.display='';
     gSlot.style.background=c;
     gSlot._gradientValue=c;
     document.querySelectorAll('.sw-dot').forEach(s=>s.classList.remove('on'));
     gSlot.classList.add('on');
-  } else {
-    // Hide gradient slot, select matching flat swatch
-    gSlot.style.display='none';
-    document.querySelectorAll('.sw-dot').forEach(s=>s.classList.toggle('on',s.style.background===c||rgb2h(s.style.background)===c));
   }
 }
 function saveBook(){
@@ -1551,7 +1565,7 @@ async function loadFromSupabase(){
 async function sbInsert(book){
   try{
     // Do NOT send id — let Supabase serial column auto-assign it
-    const payload={title:book.title,author:book.author,genre:book.genre||'',status:book.status,color:book.color};
+    const payload={id:book.id,title:book.title,author:book.author,genre:book.genre||'',status:book.status,color:book.color};
     console.log('[sbInsert] Sending payload:', payload);
     const res = await fetch(SUPABASE_URL+'/rest/v1/books', {
       method:'POST',
