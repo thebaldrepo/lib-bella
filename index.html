@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Haa & Bella's Library</title>
+<link rel="icon" type="image/png" href="nav.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 <style>
@@ -47,11 +48,11 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 ::-webkit-scrollbar-thumb{background:var(--rose);border-radius:2px}
 
 /* ═══════════════════════════
-   GATE
+   GATE / LOGIN
 ═══════════════════════════ */
 #gate{
   position:fixed;inset:0;z-index:9999;
-  background:var(--dark);
+  background:radial-gradient(ellipse 80% 80% at 50% 40%, #2a1828 0%, #160910 60%, #0e0508 100%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:var(--sp-md);
   transition:opacity .7s ease;
@@ -60,8 +61,8 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 
 .gate-glow{
   position:absolute;
-  width:clamp(300px,70vw,480px);height:clamp(140px,32vw,200px);
-  background:radial-gradient(ellipse,rgba(201,123,138,.13) 0%,transparent 70%);
+  width:clamp(300px,70vw,480px);height:clamp(140px,32vw,220px);
+  background:radial-gradient(ellipse,rgba(201,123,138,.15) 0%,transparent 70%);
   pointer-events:none;
   animation:glowPulse 4s ease-in-out infinite;
 }
@@ -69,11 +70,12 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 
 .gate-logo{
   position:relative;z-index:1;
-  width:clamp(240px,58vw,380px);
-  opacity:0;
+  width:clamp(220px,52vw,340px);
   mix-blend-mode:screen;
   filter:brightness(1.6) saturate(1.2);
+  opacity:0;
   animation:logoIn 1.3s cubic-bezier(.22,1,.36,1) forwards, floatY 5s ease-in-out 1.3s infinite;
+  margin-bottom:var(--sp-sm);
 }
 @keyframes logoIn{
   0%  {opacity:0;transform:scale(.88) translateY(18px)}
@@ -84,32 +86,125 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 
 .gate-orn{
   display:flex;align-items:center;gap:10px;
-  margin:var(--sp-sm) 0 var(--sp-lg);
+  margin-bottom:var(--sp-md);
   opacity:0;animation:fadeUp .5s ease 1.1s forwards;
 }
 .orn-line{height:.5px;width:clamp(36px,8vw,64px);background:var(--rose);opacity:.4}
 .orn-gem{width:6px;height:6px;background:var(--rose);transform:rotate(45deg);flex-shrink:0}
 
-.gate-sub{
-  font-family:'Cinzel',serif;color:rgba(224,168,181,.45);
-  font-size:var(--fs-xs);letter-spacing:.22em;text-transform:uppercase;
-  opacity:0;animation:fadeUp .5s ease 1.2s forwards;
-  margin-bottom:var(--sp-lg);
+/* lock icon */
+.gate-lock{
+  opacity:0;animation:fadeUp .5s ease 1.15s forwards;
+  margin-bottom:var(--sp-sm);
+  color:var(--rose);
 }
+.gate-lock svg{width:28px;height:28px;stroke:var(--rose);stroke-width:1.4;fill:none}
+
+/* password input field */
+.gate-pw-wrap{
+  position:relative;
+  opacity:0;animation:fadeUp .5s ease 1.25s forwards;
+  margin-bottom:var(--sp-sm);
+}
+.gate-pw{
+  width:clamp(240px,60vw,360px);
+  padding:13px 44px 13px 20px;
+  background:rgba(255,255,255,.06);
+  border:.5px solid rgba(201,123,138,.35);
+  border-radius:12px;
+  font-family:'Cinzel',serif;font-size:var(--fs-sm);
+  color:var(--rose-lt);outline:none;letter-spacing:.2em;
+  text-align:center;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+  -webkit-text-security:disc;
+}
+.gate-pw::placeholder{color:rgba(201,123,138,.35);letter-spacing:.05em;font-size:var(--fs-xs)}
+.gate-pw:focus{border-color:var(--rose);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(201,123,138,.12)}
+.gate-pw.shake{animation:shake .4s ease}
+.gate-pw.wrong{border-color:#e07070;box-shadow:0 0 0 3px rgba(220,80,80,.12)}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  15%    {transform:translateX(-8px)}
+  30%    {transform:translateX(8px)}
+  45%    {transform:translateX(-6px)}
+  60%    {transform:translateX(6px)}
+  75%    {transform:translateX(-3px)}
+  90%    {transform:translateX(3px)}
+}
+
+.gate-pw-eye{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;padding:4px;
+  color:rgba(201,123,138,.5);transition:color .15s;
+}
+.gate-pw-eye:hover{color:var(--rose)}
+.gate-pw-eye svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+.gate-err{
+  font-family:'Cinzel',serif;font-size:var(--fs-xs);
+  color:#e07070;letter-spacing:.08em;
+  min-height:18px;text-align:center;margin-top:2px;
+  opacity:0;transition:opacity .2s;
+}
+.gate-err.show{opacity:1}
+
 .gate-btn{
-  display:inline-flex;align-items:center;gap:10px;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
   background:var(--rose);color:#fff;
   border:none;font-family:'Cinzel',serif;font-size:var(--fs-sm);
   font-weight:600;letter-spacing:.13em;
-  padding:12px 42px;border-radius:50px;cursor:pointer;
-  box-shadow:0 4px 24px rgba(201,123,138,.38);
+  width:clamp(240px,60vw,360px);
+  padding:13px 24px;border-radius:12px;cursor:pointer;
+  box-shadow:0 4px 24px rgba(201,123,138,.35);
   transition:background .2s,transform .15s,box-shadow .2s;
-  opacity:0;animation:fadeUp .5s ease 1.45s forwards;
+  opacity:0;animation:fadeUp .5s ease 1.4s forwards;
+  margin-top:var(--sp-xs);
 }
 .gate-btn:hover{background:var(--rose-lt);transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,123,138,.5)}
-.gate-btn svg{width:14px;height:14px}
+
+.gate-caption{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  color:rgba(201,123,138,.28);font-size:var(--fs-xs);
+  margin-top:var(--sp-md);letter-spacing:.05em;
+  opacity:0;animation:fadeUp .4s ease 1.6s forwards;
+}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── date-keyed password modal (shared for add + delete) ── */
+.pw-modal-ov{
+  position:fixed;inset:0;z-index:700;
+  background:rgba(22,9,6,.55);
+  display:flex;align-items:center;justify-content:center;
+  padding:1rem;backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.pw-modal-ov.open{opacity:1;pointer-events:all}
+.pw-modal{
+  background:var(--cream);border-radius:18px;
+  padding:1.8rem;width:320px;max-width:95vw;
+  border:.5px solid var(--rose-dim);
+  box-shadow:0 24px 60px rgba(58,20,8,.2);
+  transform:translateY(18px) scale(.97);transition:transform .28s ease;
+  text-align:center;
+}
+.pw-modal-ov.open .pw-modal{transform:translateY(0) scale(1)}
+.pw-modal-ttl{font-family:'Cormorant Garamond',serif;font-size:var(--fs-md);font-style:italic;color:var(--ink);margin-bottom:.4rem}
+.pw-modal-sub{font-family:'EB Garamond',serif;font-size:var(--fs-sm);color:var(--muted);margin-bottom:1.2rem;font-style:italic}
+.pw-modal-in{
+  width:100%;padding:10px 14px;border:.5px solid rgba(201,123,138,.32);border-radius:10px;
+  background:var(--parchment);font-family:'Cinzel',serif;font-size:var(--fs-base);
+  color:var(--ink);outline:none;text-align:center;letter-spacing:.15em;
+  transition:border-color .2s;
+}
+.pw-modal-in:focus{border-color:var(--rose)}
+.pw-modal-in.shake{animation:shake .4s ease}
+.pw-modal-err{font-family:'Cinzel',serif;font-size:var(--fs-xs);color:#c04030;min-height:18px;margin-top:6px;letter-spacing:.06em}
+.pw-modal-btns{display:flex;gap:9px;margin-top:1.2rem}
+.pw-modal-btns .bp{flex:1;padding:10px;background:var(--rose);color:#fff;border:none;border-radius:28px;font-family:'Cinzel',serif;font-size:var(--fs-xs);font-weight:600;letter-spacing:.1em;cursor:pointer;transition:background .2s}
+.pw-modal-btns .bp:hover{background:var(--rose-lt)}
+.pw-modal-btns .bs{flex:1;padding:10px;background:transparent;color:var(--muted);border:.5px solid var(--rose-dim);border-radius:28px;font-family:'Cinzel',serif;font-size:var(--fs-xs);letter-spacing:.1em;cursor:pointer;transition:background .2s}
+.pw-modal-btns .bs:hover{background:var(--parchment)}
 
 /* ═══════════════════════════
    APP / NAV
@@ -128,7 +223,7 @@ nav{
 }
 nav.hide{transform:translateY(-100%)}
 
-.nav-logo{height:34px;object-fit:contain;cursor:pointer;mix-blend-mode:screen;filter:brightness(1.8) saturate(1.2)}
+.nav-logo{height:32px;object-fit:contain;cursor:pointer}
 .nav-logo-fb{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rose-lt);font-size:1rem;display:none}
 
 .nav-add{
@@ -304,17 +399,31 @@ nav.hide{transform:translateY(-100%)}
 
 /* SHELF PLANK — warm wood, no harsh borders */
 .shelf-plank{
-  background:
-    linear-gradient(to bottom,
-      #f9ede0 0%,
-      #f0dcc8 55%,
-      #c8845a 55.01%,
-      #b87248 100%
-    );
+  background:linear-gradient(175deg,
+    #fde8d8 0%,
+    #f9d8c4 20%,
+    #f5ccb4 40%,
+    #f0c0a0 60%,
+    #e8b090 80%,
+    #dea080 100%
+  );
   border-radius:12px;
-  box-shadow:0 6px 0 #a86038, 0 10px 30px rgba(58,20,8,.12),inset 0 1px 0 rgba(255,255,255,.25);
+  box-shadow:
+    0 6px 0 rgba(180,100,60,.35),
+    0 10px 30px rgba(58,20,8,.1),
+    inset 0 1px 0 rgba(255,255,255,.3),
+    inset 0 -2px 8px rgba(180,100,60,.15);
   padding:2rem 1.8rem .55rem;
   min-height:200px;
+  position:relative;
+  overflow:hidden;
+}
+.shelf-plank::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 20%,rgba(255,220,190,.4) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 50% at 80% 70%,rgba(255,190,150,.2) 0%,transparent 55%);
+  pointer-events:none;
 }
 .books-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;min-height:155px;padding-bottom:6px}
 .empty-shelf{width:100%;min-height:130px;display:flex;align-items:center;justify-content:center}
@@ -556,23 +665,30 @@ footer{
 </head>
 <body>
 
-<!-- GATE -->
+<!-- GATE / LOGIN -->
 <div id="gate">
   <div class="gate-glow"></div>
   <img src="logo.png" alt="Haa & Bella's Library" class="gate-logo" onerror="this.style.display='none'">
   <div class="gate-orn"><div class="orn-line"></div><div class="orn-gem"></div><div class="orn-line"></div></div>
-  <p class="gate-sub">a cozy home for our books</p>
-  <button class="gate-btn" id="enterBtn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-    Enter the Library
-  </button>
+  <div class="gate-lock">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  </div>
+  <div class="gate-pw-wrap">
+    <input type="password" class="gate-pw" id="gatePw" placeholder="enter password" autocomplete="off">
+    <button class="gate-pw-eye" id="pwEye" onclick="togglePwVis()" tabindex="-1">
+      <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+  </div>
+  <div class="gate-err" id="gateErr">Incorrect password. Please try again.</div>
+  <button class="gate-btn" id="enterBtn">Enter the Library</button>
+  <p class="gate-caption">Haa &amp; Bella's private collection</p>
 </div>
 
 <!-- APP -->
 <div id="app">
 
   <nav id="nav">
-    <img src="logo.png" alt="Haa & Bella's Library" class="nav-logo"
+    <img src="nav.png" alt="Haa & Bella's Library" class="nav-logo"
          onerror="this.style.display='none';document.querySelector('.nav-logo-fb').style.display='block'">
     <span class="nav-logo-fb">Haa &amp; Bella's Library</span>
     <button class="nav-add" onclick="openAdd()">
@@ -649,6 +765,20 @@ footer{
 
 </div><!-- #app -->
 
+<!-- DATE-KEY PASSWORD MODAL -->
+<div class="pw-modal-ov" id="pwModalOv">
+  <div class="pw-modal">
+    <div class="pw-modal-ttl" id="pwModalTtl">Confirm Action</div>
+    <div class="pw-modal-sub" id="pwModalSub">Enter today's access key to proceed.</div>
+    <input type="password" class="pw-modal-in" id="pwModalIn" placeholder="••••••••" autocomplete="off">
+    <div class="pw-modal-err" id="pwModalErr"></div>
+    <div class="pw-modal-btns">
+      <button class="bs" onclick="closePwModal()">Cancel</button>
+      <button class="bp" onclick="submitPwModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- ADD / EDIT MODAL -->
 <div class="ov" id="addOv" onclick="bgDismiss(event,'addOv')">
   <div class="modal">
@@ -718,67 +848,77 @@ const COLORS=[
 
 let books=[
   /* ── Fiction ── */
-  {id:1, title:'The Ministry of Utmost Happiness',     author:'Arundhati Roy',                         genre:'Fiction',                      status:'read', color:'#f2b0b8'},
-  {id:2, title:'The God of Small Things',              author:'Arundhati Roy',                         genre:'Fiction',                      status:'read', color:'#e8a8b8'},
-  {id:3, title:'The Reluctant Fundamentalist',         author:'Mohsin Hamid',                          genre:'Fiction',                      status:'read', color:'#f0b4a8'},
-  {id:4, title:'The Kite Runner',                      author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'#c8b0d8'},
-  {id:5, title:'A Thousand Splendid Suns',             author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'#d4a8cc'},
-  {id:6, title:'And the Mountains Echoed',             author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'#c0a4d0'},
-  {id:7, title:'The Kashmir Shawl',                    author:'Rosie Thomas',                          genre:'Fiction',                      status:'read', color:'#b8c8e0'},
+  {id:1, title:'The Ministry of Utmost Happiness',     author:'Arundhati Roy',                         genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fdd0b0,#f8b898)'},
+  {id:2, title:'The God of Small Things',              author:'Arundhati Roy',                         genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#f9c4a8,#f2a888)'},
+  {id:3, title:'The Reluctant Fundamentalist',         author:'Mohsin Hamid',                          genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fcd8c0,#f5bca0)'},
+  {id:4, title:'The Kite Runner',                      author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fde0cc,#f8c8a8)'},
+  {id:5, title:'A Thousand Splendid Suns',             author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fbcbb0,#f4a888)'},
+  {id:6, title:'And the Mountains Echoed',             author:'Khaled Hosseini',                       genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fad4b8,#f0b090)'},
+  {id:7, title:'The Kashmir Shawl',                    author:'Rosie Thomas',                          genre:'Fiction',                      status:'read', color:'linear-gradient(135deg,#fcddc8,#f5c0a0)'},
   /* ── Classic Literature ── */
-  {id:8, title:'To Kill a Mockingbird',                author:'Harper Lee',                            genre:'Classic Literature',           status:'read', color:'#a8c8a8'},
-  {id:9, title:'The Catcher in the Rye',               author:'J.D. Salinger',                         genre:'Classic Literature',           status:'read', color:'#b0d0b0'},
-  {id:10,title:'Jane Eyre',                            author:'Charlotte Brontë',                      genre:'Classic Literature',           status:'read', color:'#b8d4b8'},
-  {id:11,title:"Gulliver's Travels",                   author:'Jonathan Swift',                        genre:'Classic Literature',           status:'read', color:'#a8d0c0'},
-  {id:12,title:'The Canterville Ghost',                author:'Oscar Wilde',                           genre:'Classic Literature',           status:'read', color:'#c0d8c0'},
+  {id:8, title:'To Kill a Mockingbird',                author:'Harper Lee',                            genre:'Classic Literature',           status:'read', color:'linear-gradient(135deg,#fce8d4,#f8d0b0)'},
+  {id:9, title:'The Catcher in the Rye',               author:'J.D. Salinger',                         genre:'Classic Literature',           status:'read', color:'linear-gradient(135deg,#fde0c8,#f8c4a0)'},
+  {id:10,title:'Jane Eyre',                            author:'Charlotte Brontë',                      genre:'Classic Literature',           status:'read', color:'linear-gradient(135deg,#fbd4b8,#f4b890)'},
+  {id:11,title:"Gulliver's Travels",                   author:'Jonathan Swift',                        genre:'Classic Literature',           status:'read', color:'linear-gradient(135deg,#fce8d0,#f8ccac)'},
+  {id:12,title:'The Canterville Ghost',                author:'Oscar Wilde',                           genre:'Classic Literature',           status:'read', color:'linear-gradient(135deg,#fadcc8,#f2c0a0)'},
   /* ── Historical Fiction ── */
-  {id:13,title:'The Book Thief',                       author:'Markus Zusak',                          genre:'Historical Fiction',           status:'read', color:'#d0c0a8'},
-  {id:14,title:'The Stationery Shop of Tehran',        author:'Marjan Kamali',                         genre:'Historical Fiction',           status:'read', color:'#c8b8a0'},
+  {id:13,title:'The Book Thief',                       author:'Markus Zusak',                          genre:'Historical Fiction',           status:'read', color:'linear-gradient(135deg,#fcd0a8,#f5b880)'},
+  {id:14,title:'The Stationery Shop of Tehran',        author:'Marjan Kamali',                         genre:'Historical Fiction',           status:'read', color:'linear-gradient(135deg,#fdd8b0,#f8c088)'},
   /* ── Dystopian ── */
-  {id:15,title:'1984',                                 author:'George Orwell',                         genre:'Dystopian Fiction',            status:'read', color:'#9ab0c8'},
+  {id:15,title:'1984',                                 author:'George Orwell',                         genre:'Dystopian Fiction',            status:'read', color:'linear-gradient(135deg,#f8ccb0,#eeaa88)'},
   /* ── Romance ── */
-  {id:16,title:'It Ends With Us',                      author:'Colleen Hoover',                        genre:'Romance Fiction',              status:'read', color:'#f4b0c0'},
-  {id:17,title:'It Starts With Us',                    author:'Colleen Hoover',                        genre:'Romance Fiction',              status:'read', color:'#f0a8bc'},
-  {id:18,title:'Me Before You',                        author:'Jojo Moyes',                            genre:'Romance Fiction',              status:'read', color:'#f2bcc8'},
-  {id:19,title:'A Walk to Remember',                   author:'Nicholas Sparks',                       genre:'Romance Fiction',              status:'read', color:'#edb4c4'},
+  {id:16,title:'It Ends With Us',                      author:'Colleen Hoover',                        genre:'Romance Fiction',              status:'read', color:'linear-gradient(135deg,#ffd8c0,#f8bca0)'},
+  {id:17,title:'It Starts With Us',                    author:'Colleen Hoover',                        genre:'Romance Fiction',              status:'read', color:'linear-gradient(135deg,#fdd0b4,#f5b494)'},
+  {id:18,title:'Me Before You',                        author:'Jojo Moyes',                            genre:'Romance Fiction',              status:'read', color:'linear-gradient(135deg,#fee0cc,#f8c4a8)'},
+  {id:19,title:'A Walk to Remember',                   author:'Nicholas Sparks',                       genre:'Romance Fiction',              status:'read', color:'linear-gradient(135deg,#fcd8c4,#f5bca0)'},
   /* ── Contemporary Fiction ── */
-  {id:20,title:'As Long as the Lemon Trees Grow',      author:'Zoulfa Katouh',                         genre:'Contemporary Fiction',         status:'read', color:'#d4e0a8'},
-  {id:21,title:'If It Happens for a Reason...',        author:'Preeti Shenoy',                         genre:'Contemporary Fiction',         status:'read', color:'#c8dc9c'},
+  {id:20,title:'As Long as the Lemon Trees Grow',      author:'Zoulfa Katouh',                         genre:'Contemporary Fiction',         status:'read', color:'linear-gradient(135deg,#fde4c8,#f8caa0)'},
+  {id:21,title:'If It Happens for a Reason...',        author:'Preeti Shenoy',                         genre:'Contemporary Fiction',         status:'read', color:'linear-gradient(135deg,#fce0c4,#f5c49c)'},
   /* ── Allegorical / Philosophical ── */
-  {id:22,title:'The Alchemist',                        author:'Paulo Coelho',                          genre:'Allegorical Fiction',          status:'read', color:'#f0cc88'},
-  {id:23,title:'Aleph',                                author:'Paulo Coelho',                          genre:'Autobiographical Fiction',     status:'read', color:'#e8c480'},
-  {id:24,title:'The Forty Rules of Love',              author:'Elif Shafak',                           genre:'Philosophical Fiction',        status:'read', color:'#d8b8e0'},
+  {id:22,title:'The Alchemist',                        author:'Paulo Coelho',                          genre:'Allegorical Fiction',          status:'read', color:'linear-gradient(135deg,#f9d4a8,#f0b878)'},
+  {id:23,title:'Aleph',                                author:'Paulo Coelho',                          genre:'Autobiographical Fiction',     status:'read', color:'linear-gradient(135deg,#fad8b0,#f2bc84)'},
+  {id:24,title:'The Forty Rules of Love',              author:'Elif Shafak',                           genre:'Philosophical Fiction',        status:'read', color:'linear-gradient(135deg,#fccca8,#f4aa78)'},
   /* ── Poetry ── */
-  {id:25,title:'The Veiled Suite: The Collected Poems',author:'Agha Shahid Ali',                       genre:'Poetry',                       status:'read', color:'#e0c0d8'},
-  {id:26,title:'Munaat (منات)',                        author:'Unknown',                               genre:'Urdu Poetry',                  status:'read', color:'#dab8d4'},
+  {id:25,title:'The Veiled Suite: The Collected Poems',author:'Agha Shahid Ali',                       genre:'Poetry',                       status:'read', color:'linear-gradient(135deg,#fce0c8,#f5c4a0)'},
+  {id:26,title:'Munaat (منات)',                        author:'Unknown',                               genre:'Urdu Poetry',                  status:'read', color:'linear-gradient(135deg,#fbd8c0,#f4bc98)'},
   /* ── Urdu Literature ── */
-  {id:27,title:'Peer-e-Kamil (پیر کامل)',              author:'Umera Ahmad',                           genre:'Urdu Fiction',                 status:'read', color:'#c8a8cc'},
-  {id:28,title:'Musafat (مسافت)',                      author:'Unknown',                               genre:'Urdu Literature',              status:'read', color:'#d0b0c8'},
+  {id:27,title:'Peer-e-Kamil (پیر کامل)',              author:'Umera Ahmad',                           genre:'Urdu Fiction',                 status:'read', color:'linear-gradient(135deg,#fcd4b8,#f5b890)'},
+  {id:28,title:'Musafat (مسافت)',                      author:'Unknown',                               genre:'Urdu Literature',              status:'read', color:'linear-gradient(135deg,#fbccb0,#f2b088)'},
   /* ── Biography / Autobiography ── */
-  {id:29,title:'The Courtroom Genius',                 author:'Soli Sorabjee & Arvind P. Datar',       genre:'Biography',                    status:'read', color:'#b8c4d8'},
-  {id:30,title:'Before My Memory Fades',               author:'Fali S. Nariman',                       genre:'Autobiography',                status:'read', color:'#aabcd0'},
-  {id:31,title:'The Sealed Nectar',                    author:'Safiur Rahman Mubarakpuri',             genre:'Biography',                    status:'read', color:'#b0c8d4'},
-  {id:32,title:'The Diary of a Young Girl',            author:'Anne Frank',                            genre:'Autobiography / History',      status:'read', color:'#c4d4a8'},
+  {id:29,title:'The Courtroom Genius',                 author:'Soli Sorabjee & Arvind P. Datar',       genre:'Biography',                    status:'read', color:'linear-gradient(135deg,#fde8d4,#f8d0b0)'},
+  {id:30,title:'Before My Memory Fades',               author:'Fali S. Nariman',                       genre:'Autobiography',                status:'read', color:'linear-gradient(135deg,#fce0cc,#f5c8a4)'},
+  {id:31,title:'The Sealed Nectar',                    author:'Safiur Rahman Mubarakpuri',             genre:'Biography',                    status:'read', color:'linear-gradient(135deg,#fddcc8,#f8c0a0)'},
+  {id:32,title:'The Diary of a Young Girl',            author:'Anne Frank',                            genre:'Autobiography / History',      status:'read', color:'linear-gradient(135deg,#fce4cc,#f5c8a4)'},
   /* ── Essays / Non-Fiction ── */
-  {id:33,title:'Azadi',                                author:'Arundhati Roy',                         genre:'Essays / Literary Non-Fiction', status:'read', color:'#f0a8a0'},
+  {id:33,title:'Azadi',                                author:'Arundhati Roy',                         genre:'Essays / Literary Non-Fiction', status:'read', color:'linear-gradient(135deg,#f9cdb0,#f0aa88)'},
   /* ── Spirituality ── */
-  {id:34,title:'Secrets of Divine Love',               author:'A. Helwa',                              genre:'Spirituality',                 status:'read', color:'#e8d0c0'},
+  {id:34,title:'Secrets of Divine Love',               author:'A. Helwa',                              genre:'Spirituality',                 status:'read', color:'linear-gradient(135deg,#fde8d8,#f8d0c0)'},
   /* ── Philosophy / Self-Help ── */
-  {id:35,title:'The Courage to Be Disliked',           author:'Ichiro Kishimi & Fumitake Koga',        genre:'Philosophy / Self-Help',       status:'read', color:'#c8d8e8'},
-  {id:36,title:'The Ikigai Journey',                   author:'Hector Garcia & Francesc Miralles',     genre:'Self-Help / Philosophy',       status:'read', color:'#c0d0e4'},
+  {id:35,title:'The Courage to Be Disliked',           author:'Ichiro Kishimi & Fumitake Koga',        genre:'Philosophy / Self-Help',       status:'read', color:'linear-gradient(135deg,#fcd8bc,#f5bc94)'},
+  {id:36,title:'The Ikigai Journey',                   author:'Hector Garcia & Francesc Miralles',     genre:'Self-Help / Philosophy',       status:'read', color:'linear-gradient(135deg,#fad0b0,#f0b488)'},
   /* ── Psychology ── */
-  {id:37,title:'Dopamine Nation',                      author:'Dr. Anna Lembke',                       genre:'Psychology / Non-Fiction',     status:'read', color:'#d0c4e8'},
+  {id:37,title:'Dopamine Nation',                      author:'Dr. Anna Lembke',                       genre:'Psychology / Non-Fiction',     status:'read', color:'linear-gradient(135deg,#f8ccb4,#eea888)'},
   /* ── Self-Help / Growth ── */
-  {id:38,title:'The 5 AM Club',                        author:'Robin Sharma',                          genre:'Self-Help / Personal Growth',  status:'read', color:'#f4c8a0'},
-  {id:39,title:'The Power of Positive Thinking',       author:'Norman Vincent Peale',                  genre:'Self-Help',                    status:'read', color:'#f0c498'},
-  {id:40,title:'Rich Dad Poor Dad',                    author:'Robert T. Kiyosaki',                    genre:'Personal Finance / Self-Help', status:'read', color:'#e8bc90'},
-  {id:41,title:'The Magic of Thinking Big',            author:'David J. Schwartz',                     genre:'Self-Help / Motivation',       status:'read', color:'#f0c8a8'},
-  {id:42,title:'You Can Win',                          author:'Shiv Khera',                            genre:'Self-Help / Motivation',       status:'read', color:'#ecc4a0'},
+  {id:38,title:'The 5 AM Club',                        author:'Robin Sharma',                          genre:'Self-Help / Personal Growth',  status:'read', color:'linear-gradient(135deg,#fbd4b0,#f2b888)'},
+  {id:39,title:'The Power of Positive Thinking',       author:'Norman Vincent Peale',                  genre:'Self-Help',                    status:'read', color:'linear-gradient(135deg,#fad0ac,#f0b484)'},
+  {id:40,title:'Rich Dad Poor Dad',                    author:'Robert T. Kiyosaki',                    genre:'Personal Finance / Self-Help', status:'read', color:'linear-gradient(135deg,#f9ccac,#eeb080)'},
+  {id:41,title:'The Magic of Thinking Big',            author:'David J. Schwartz',                     genre:'Self-Help / Motivation',       status:'read', color:'linear-gradient(135deg,#fcd4b0,#f4b888)'},
+  {id:42,title:'You Can Win',                          author:'Shiv Khera',                            genre:'Self-Help / Motivation',       status:'read', color:'linear-gradient(135deg,#fbd0ac,#f0b484)'},
 ];
 let nextId=43,editId=null,viewId=null,activeCl=COLORS[0];
 
-/* ── Gate ── */
-document.getElementById('enterBtn').addEventListener('click',()=>{
+/* ── Gate / Login ── */
+const GATE_PW = 'Bella';
+
+function todayKey(){
+  const d=new Date();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const yyyy=String(d.getFullYear());
+  return dd+mm+yyyy;
+}
+
+function unlockApp(){
   const gate=document.getElementById('gate');
   gate.classList.add('out');
   setTimeout(()=>{
@@ -795,6 +935,77 @@ document.getElementById('enterBtn').addEventListener('click',()=>{
       );
     });
   },700);
+}
+
+// Check if already authenticated on this device
+if(localStorage.getItem('hbl_auth')==='1') unlockApp();
+
+document.getElementById('enterBtn').addEventListener('click',()=>{
+  const val=document.getElementById('gatePw').value;
+  if(val===GATE_PW){
+    localStorage.setItem('hbl_auth','1');
+    unlockApp();
+  } else {
+    const inp=document.getElementById('gatePw');
+    const err=document.getElementById('gateErr');
+    inp.classList.remove('shake','wrong');
+    void inp.offsetWidth; // reflow
+    inp.classList.add('shake','wrong');
+    err.classList.add('show');
+    setTimeout(()=>{inp.value='';inp.classList.remove('wrong');},800);
+  }
+});
+
+document.getElementById('gatePw').addEventListener('keydown',e=>{
+  if(e.key==='Enter') document.getElementById('enterBtn').click();
+});
+
+function togglePwVis(){
+  const inp=document.getElementById('gatePw');
+  const icon=document.getElementById('eyeIcon');
+  if(inp.type==='password'){
+    inp.type='text';
+    inp.style.webkitTextSecurity='none';
+    icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type='password';
+    inp.style.webkitTextSecurity='';
+    icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+/* ── Date-key password modal ── */
+let pwModalCallback=null;
+
+function openPwModal(title, sub, callback){
+  pwModalCallback=callback;
+  document.getElementById('pwModalTtl').textContent=title;
+  document.getElementById('pwModalSub').textContent=sub;
+  document.getElementById('pwModalIn').value='';
+  document.getElementById('pwModalErr').textContent='';
+  document.getElementById('pwModalOv').classList.add('open');
+  setTimeout(()=>document.getElementById('pwModalIn').focus(),100);
+}
+function closePwModal(){
+  document.getElementById('pwModalOv').classList.remove('open');
+  pwModalCallback=null;
+}
+function submitPwModal(){
+  const val=document.getElementById('pwModalIn').value.trim();
+  const inp=document.getElementById('pwModalIn');
+  if(val===todayKey()){
+    closePwModal();
+    if(pwModalCallback) pwModalCallback();
+  } else {
+    inp.classList.remove('shake');
+    void inp.offsetWidth;
+    inp.classList.add('shake');
+    document.getElementById('pwModalErr').textContent='Incorrect key. Please try again.';
+    setTimeout(()=>{ inp.value=''; inp.classList.remove('shake'); },600);
+  }
+}
+document.getElementById('pwModalIn').addEventListener('keydown',e=>{
+  if(e.key==='Enter') submitPwModal();
 });
 
 /* ── Floating particles in hero ── */
@@ -920,14 +1131,30 @@ function saveBook(){
   const s=document.getElementById('iStat').value;
   if(!t||!a){showToast('Please fill in title and author.');return}
   if(editId!==null){
-    const b=books.find(x=>x.id===editId);
-    if(b)Object.assign(b,{title:t,author:a,genre:g,status:s,color:activeCl});
-    showToast('Book updated ✓');
-  }else{
-    books.push({id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl});
-    showToast('Book added to the shelf ✓');
+    // edits require date-key too
+    const bRef=books.find(x=>x.id===editId);
+    if(!bRef)return;
+    openPwModal(
+      'Save Changes',
+      `Enter the passkey to save changes to "${bRef.title}".`,
+      ()=>{
+        Object.assign(bRef,{title:t,author:a,genre:g,status:s,color:activeCl});
+        showToast('Book updated ✓');
+        closeAdd();renderAll();
+      }
+    );
+  } else {
+    // adding new book requires date-key
+    openPwModal(
+      'Add to the Shelf',
+      'Enter the passkey to add this book.',
+      ()=>{
+        books.push({id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl});
+        showToast('Book added to the shelf ✓');
+        closeAdd();renderAll();
+      }
+    );
   }
-  closeAdd();renderAll();
 }
 
 /* ── Detail ── */
@@ -958,21 +1185,34 @@ function toggleStatus(){
 }
 function editDet(){
   const b=books.find(x=>x.id===viewId);if(!b)return;
-  editId=b.id;
-  document.getElementById('mTtl').textContent='Edit Book';
-  document.getElementById('iTitle').value=b.title;
-  document.getElementById('iAuth').value=b.author;
-  document.getElementById('iGenre').value=b.genre||'';
-  document.getElementById('iStat').value=b.status;
-  setCol(b.color);
   closeDet();
-  document.getElementById('addOv').classList.add('open');
+  openPwModal(
+    'Edit Book',
+    `Enter the passkey to edit "${b.title}".`,
+    ()=>{
+      editId=b.id;
+      document.getElementById('mTtl').textContent='Edit Book';
+      document.getElementById('iTitle').value=b.title;
+      document.getElementById('iAuth').value=b.author;
+      document.getElementById('iGenre').value=b.genre||'';
+      document.getElementById('iStat').value=b.status;
+      setCol(b.color);
+      document.getElementById('addOv').classList.add('open');
+    }
+  );
 }
 function delBook(){
   const b=books.find(x=>x.id===viewId);if(!b)return;
-  if(!confirm(`Remove "${b.title}" from the shelf?`))return;
-  books=books.filter(x=>x.id!==viewId);
-  closeDet();renderAll();showToast('Book removed.');
+  closeDet();
+  openPwModal(
+    'Remove from Shelf',
+    `Enter the passkey to remove "${b.title}".`,
+    ()=>{
+      books=books.filter(x=>x.id!==viewId);
+      renderAll();
+      showToast('Book removed from the shelf.');
+    }
+  );
 }
 
 /* ── helpers ── */
