@@ -778,7 +778,7 @@ document.addEventListener('dragstart',   e=> e.preventDefault());
 /* ═══════════════════════════
    EASTER EGG — ROSE PETALS
 ═══════════════════════════ */
-footer{position:relative;overflow:hidden}
+footer{position:relative;overflow:visible}
 
 .petal{
   position:absolute;
@@ -1766,10 +1766,10 @@ async function sbDelete(id){
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         const col   = colors[Math.floor(Math.random() * colors.length)];
         const startX= Math.random() * footerW;       // horizontal start
-        const drift = (Math.random() - 0.5) * footerW * 0.55; // how far it drifts sideways
-        const fall  = footerH * (0.55 + Math.random() * 0.42); // how far it falls
-        const spin  = (Math.random() - 0.5) * 380;  // degrees of rotation
-        const dur   = 1.4 + Math.random() * 1.8;    // fall duration
+        const drift = (Math.random() - 0.5) * Math.min(footerW * 0.3, 80); // gentle drift, stays in footer
+        // fall distance computed below with landY
+        const spin  = (Math.random() - 0.5) * 200;  // natural rotation
+        const dur   = 0.7 + Math.random() * 0.7;    // fall duration — snappy
         const delay = 0;
         const scEnd = 0.85 + Math.random() * 0.3;   // slight scale change on land
         const tiltX = (Math.random() - 0.5) * 30;   // perspective tilt at rest
@@ -1799,11 +1799,17 @@ async function sbDelete(id){
         </svg>`;
 
         petal.innerHTML = svg;
+        // Petals start above the footer (spread across top half) and fall down within it
+        // footer is position:relative, overflow:visible so petals land inside it
+        const startY = -(sz * 2 + Math.random() * sz * 3); // above footer, varies
+        // fall far enough to land near or at the footer floor
+        const landY  = footerH * (0.6 + Math.random() * 0.38);
+
         petal.style.cssText = `
           left: ${startX}px;
-          top: -${sz*2.5}px;
+          top: ${startY}px;
           --drift: ${drift}px;
-          --fall:  ${fall}px;
+          --fall:  ${landY}px;
           --spin:  ${spin}deg;
           --sc:    ${scEnd};
           animation-duration: ${dur}s;
@@ -1822,9 +1828,9 @@ async function sbDelete(id){
           petal.style.transition = 'opacity 1.8s ease';
           petal.style.opacity = '0';
           setTimeout(()=> petal.remove(), 2000);
-        }, dur * 1000 + 4500);
+        }, dur * 1000 + 5500);
 
-      }, i * 75 + Math.random() * 120);
+      }, i * 45 + Math.random() * 60);
     }
   }
 })();
