@@ -42,7 +42,7 @@
 }
 
 html{scroll-behavior:smooth}
-body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(--ink);overflow-x:hidden}
+body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(--ink);overflow-x:hidden;user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:var(--parchment)}
 ::-webkit-scrollbar-thumb{background:var(--rose);border-radius:2px}
@@ -362,6 +362,7 @@ nav.hide{transform:translateY(-100%)}
   color:var(--rose-lt);outline:none;
   transition:border-color .2s,background .2s;
 }
+input,textarea,select{user-select:text;-webkit-user-select:text;}
 .srch::placeholder{color:rgba(158,112,96,.5);font-style:italic}
 .srch:focus{border-color:var(--rose);background:rgba(255,255,255,.08)}
 .fsel{
@@ -766,6 +767,59 @@ footer{
   font-family:'Cormorant Garamond',serif;font-style:italic;
   font-size:var(--fs-sm);color:rgba(158,112,96,.35);letter-spacing:.03em;
 }
+
+/* ── Block text selection & context menu ── */
+document.addEventListener('selectstart', e=>{
+  if(!['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) e.preventDefault();
+});
+document.addEventListener('contextmenu', e=> e.preventDefault());
+document.addEventListener('dragstart',   e=> e.preventDefault());
+
+/* ═══════════════════════════
+   EASTER EGG — ROSE PETALS
+═══════════════════════════ */
+footer{position:relative;overflow:hidden}
+
+.petal{
+  position:absolute;
+  top:-60px;
+  pointer-events:none;
+  opacity:0;
+  transform-origin:center center;
+  animation:petalFall linear forwards;
+}
+
+/* SVG petal paths rendered inline via JS — just size + position here */
+@keyframes petalFall{
+  0%{
+    opacity:0;
+    transform:translateX(0) translateY(0) rotate(0deg) scale(1);
+  }
+  8%{ opacity:.9; }
+  70%{
+    opacity:.85;
+  }
+  100%{
+    opacity:.7;
+    transform:translateX(var(--drift)) translateY(var(--fall)) rotate(var(--spin)) scale(var(--sc));
+  }
+}
+
+@keyframes petalSettle{
+  0%  { transform:translateX(var(--drift)) translateY(var(--fall)) rotate(var(--spin)) scale(var(--sc)); }
+  40% { transform:translateX(var(--drift)) translateY(calc(var(--fall) - 6px)) rotate(calc(var(--spin) + 8deg)) scale(var(--sc)); }
+  100%{ transform:translateX(var(--drift)) translateY(var(--fall)) rotate(var(--spin)) scale(var(--sc)); opacity:.65; }
+}
+
+.petal.settled{
+  animation:petalSettle .55s ease-out forwards;
+}
+
+/* subtle glow on footer logo when egg triggered */
+.footer-logo.egg-active{
+  filter:brightness(2) saturate(1.8) drop-shadow(0 0 8px rgba(201,123,138,.7));
+  transition:filter .4s ease;
+}
 </style>
 </head>
 <body>
@@ -891,8 +945,8 @@ footer{
     </div>
   </section>
 
-  <footer>
-    <img src="logo.png" alt="Haa & Bella's Library" class="footer-logo" onerror="this.style.display='none'">
+  <footer id="footerEl">
+    <img src="logo.png" alt="Haa & Bella's Library" class="footer-logo" id="footerLogo" onerror="this.style.display='none'" onclick="eggTap()">
     <p class="footer-copy">made with love · Haa &amp; Bella's personal collection 🌸</p>
   </footer>
 
@@ -1639,6 +1693,141 @@ async function sbDelete(id){
     if(!res.ok){ const e=await res.text(); console.error('Delete failed:',e); showToast('Delete failed — check console.'); }
   } catch(e){ console.error('sbDelete error:', e); }
 }
+
+/* ═══════════════════════════
+   EASTER EGG — ROSE PETALS
+═══════════════════════════ */
+(function(){
+  let tapCount = 0, tapTimer = null, eggsActive = false;
+
+  window.eggTap = function(){
+    clearTimeout(tapTimer);
+    tapCount++;
+    // Reset counter if no tap within 1.2s
+    tapTimer = setTimeout(()=>{ tapCount = 0; }, 1200);
+    if(tapCount >= 3){
+      tapCount = 0;
+      clearTimeout(tapTimer);
+      spawnPetals();
+    }
+  };
+
+  function spawnPetals(){
+    const footer = document.getElementById('footerEl');
+    const logo   = document.getElementById('footerLogo');
+    if(!footer) return;
+
+    // Brief glow on logo
+    logo.classList.add('egg-active');
+    setTimeout(()=> logo.classList.remove('egg-active'), 1800);
+
+    // Responsive petal size — small on mobile, moderate on desktop
+    const vw  = window.innerWidth;
+    const baseSize = vw < 480 ? 18 : vw < 768 ? 22 : 28; // px
+
+    const footerW = footer.offsetWidth;
+    const footerH = footer.offsetHeight;
+
+    // How many petals — more on bigger screens
+    const count = vw < 480 ? 22 : vw < 768 ? 32 : 44;
+
+    // Petal shape variants (SVG path data) — organic, asymmetric rose petals
+    const shapes = [
+      // teardrop-ish
+      'M 0,-1 C 0.55,-0.8 0.9,-0.3 0.8,0.2 C 0.7,0.7 0.2,1 0,1 C -0.2,1 -0.7,0.7 -0.8,0.2 C -0.9,-0.3 -0.55,-0.8 0,-1 Z',
+      // wider oval petal
+      'M 0,-1 C 0.7,-0.7 1,0 0.7,0.5 C 0.4,1 -0.4,1 -0.7,0.5 C -1,0 -0.7,-0.7 0,-1 Z',
+      // slightly cupped
+      'M 0,-1 C 0.4,-0.9 0.95,-0.4 0.85,0.15 C 0.75,0.65 0.3,1.05 0,0.95 C -0.3,1.05 -0.75,0.65 -0.85,0.15 C -0.95,-0.4 -0.4,-0.9 0,-1 Z',
+      // narrow petal
+      'M 0,-1 C 0.3,-0.6 0.5,0 0.4,0.5 C 0.3,0.85 0.1,1 0,1 C -0.1,1 -0.3,0.85 -0.4,0.5 C -0.5,0 -0.3,-0.6 0,-1 Z',
+      // asymmetric
+      'M 0,-1 C 0.6,-0.7 1,-0.1 0.75,0.45 C 0.5,0.9 0.15,1.05 0,0.95 C -0.25,1 -0.65,0.7 -0.7,0.2 C -0.75,-0.35 -0.45,-0.8 0,-1 Z',
+    ];
+
+    // Rose petal color palette — warm pinks, mauves, blush
+    const colors = [
+      {fill:'#e8a0b0', vein:'#d07890'},
+      {fill:'#f2b8c8', vein:'#dd90a8'},
+      {fill:'#dda0b8', vein:'#c47898'},
+      {fill:'#f5c8d8', vein:'#e0a0bc'},
+      {fill:'#c890a8', vein:'#b07090'},
+      {fill:'#f0aec0', vein:'#da8aa2'},
+      {fill:'#e0b8cc', vein:'#c898b0'},
+    ];
+
+    for(let i = 0; i < count; i++){
+      setTimeout(()=>{
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+
+        // Random properties
+        const sz    = baseSize * (0.7 + Math.random() * 0.65);
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const col   = colors[Math.floor(Math.random() * colors.length)];
+        const startX= Math.random() * footerW;       // horizontal start
+        const drift = (Math.random() - 0.5) * footerW * 0.55; // how far it drifts sideways
+        const fall  = footerH * (0.55 + Math.random() * 0.42); // how far it falls
+        const spin  = (Math.random() - 0.5) * 380;  // degrees of rotation
+        const dur   = 1.4 + Math.random() * 1.8;    // fall duration
+        const delay = 0;
+        const scEnd = 0.85 + Math.random() * 0.3;   // slight scale change on land
+        const tiltX = (Math.random() - 0.5) * 30;   // perspective tilt at rest
+
+        // Build SVG petal — includes a subtle vein and soft gradient
+        const uid = 'pg' + Math.random().toString(36).slice(2,7);
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg"
+          width="${sz*2}" height="${sz*2.2}"
+          viewBox="-1.15 -1.15 2.3 2.45">
+          <defs>
+            <radialGradient id="${uid}" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="${col.fill}" stop-opacity="1"/>
+              <stop offset="60%" stop-color="${col.fill}" stop-opacity="0.92"/>
+              <stop offset="100%" stop-color="${col.vein}" stop-opacity="0.8"/>
+            </radialGradient>
+          </defs>
+          <!-- petal body -->
+          <path d="${shape}" fill="url(#${uid})" stroke="${col.vein}" stroke-width="0.03" stroke-opacity="0.4"/>
+          <!-- central vein -->
+          <line x1="0" y1="-0.85" x2="0" y2="0.85"
+                stroke="${col.vein}" stroke-width="0.04" stroke-opacity="0.25"
+                stroke-linecap="round"/>
+          <!-- highlight sheen -->
+          <ellipse cx="-0.18" cy="-0.42" rx="0.18" ry="0.28"
+                   fill="white" fill-opacity="0.18"
+                   transform="rotate(-18 -0.18 -0.42)"/>
+        </svg>`;
+
+        petal.innerHTML = svg;
+        petal.style.cssText = `
+          left: ${startX}px;
+          top: -${sz*2.5}px;
+          --drift: ${drift}px;
+          --fall:  ${fall}px;
+          --spin:  ${spin}deg;
+          --sc:    ${scEnd};
+          animation-duration: ${dur}s;
+          animation-delay: 0s;
+        `;
+
+        footer.appendChild(petal);
+
+        // After fall animation, trigger subtle settle wobble then freeze
+        setTimeout(()=>{
+          petal.classList.add('settled');
+        }, dur * 1000);
+
+        // Remove after settle so they don't pile up across multiple egg activations
+        setTimeout(()=>{
+          petal.style.transition = 'opacity 1.8s ease';
+          petal.style.opacity = '0';
+          setTimeout(()=> petal.remove(), 2000);
+        }, dur * 1000 + 4500);
+
+      }, i * 75 + Math.random() * 120);
+    }
+  }
+})();
 </script>
 </body>
 </html>
