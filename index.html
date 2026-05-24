@@ -116,7 +116,6 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
   color:var(--rose-lt);outline:none;letter-spacing:.2em;
   text-align:center;
   transition:border-color .2s,background .2s,box-shadow .2s;
-  -webkit-text-security:disc;
 }
 .gate-pw::placeholder{color:rgba(201,123,138,.35);letter-spacing:.05em;font-size:var(--fs-xs)}
 .gate-pw:focus{border-color:var(--rose);background:rgba(255,255,255,.09);box-shadow:0 0 0 3px rgba(201,123,138,.12)}
@@ -226,15 +225,27 @@ nav.hide{transform:translateY(-100%)}
 .nav-logo{height:32px;object-fit:contain;cursor:pointer}
 .nav-logo-fb{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rose-lt);font-size:1rem;display:none}
 
-.nav-add{
-  background:var(--rose);color:#fff;
-  font-family:'Cinzel',serif;font-size:var(--fs-xs);font-weight:600;letter-spacing:.1em;
-  border:none;padding:7px 17px;border-radius:28px;cursor:pointer;
-  display:flex;align-items:center;gap:6px;
-  transition:background .2s,transform .15s;white-space:nowrap;
+.nav-add-glass{
+  width:38px;height:38px;
+  border-radius:50%;
+  border:.5px solid rgba(201,123,138,.38);
+  background:rgba(201,123,138,.12);
+  backdrop-filter:blur(12px) saturate(1.4);
+  -webkit-backdrop-filter:blur(12px) saturate(1.4);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--rose-lt);
+  box-shadow:0 2px 12px rgba(201,123,138,.2),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:background .2s,transform .18s,box-shadow .2s,border-color .2s;
 }
-.nav-add:hover{background:var(--rose-lt);transform:translateY(-1px)}
-.nav-add svg{width:12px;height:12px}
+.nav-add-glass:hover{
+  background:rgba(201,123,138,.28);
+  border-color:rgba(201,123,138,.7);
+  transform:scale(1.1);
+  box-shadow:0 4px 20px rgba(201,123,138,.4),inset 0 1px 0 rgba(255,255,255,.12);
+}
+.nav-add-glass:active{transform:scale(.96)}
+.nav-add-glass svg{width:17px;height:17px;stroke:currentColor;stroke-width:2.2}
 
 /* ═══════════════════════════
    HERO
@@ -329,14 +340,13 @@ nav.hide{transform:translateY(-100%)}
 .scroll-cue svg{width:15px;height:15px}
 
 /* ═══════════════════════════
-   CONTROLS
+   CONTROLS — inline bar (in page flow, not sticky)
 ═══════════════════════════ */
 #controls{
   background:rgba(22,9,6,.97);
   border-bottom:.5px solid var(--rose-dim);
   padding:9px var(--sp-md);
   display:flex;justify-content:center;align-items:center;
-  position:sticky;top:0;z-index:90;
 }
 .controls-inner{
   display:flex;gap:8px;align-items:center;flex-wrap:wrap;
@@ -366,6 +376,89 @@ nav.hide{transform:translateY(-100%)}
   transition:border-color .2s;
 }
 .fsel:focus{border-color:var(--rose)}
+
+/* ═══════════════════════════
+   FLOATING GLASS FAB
+   appears once #controls scrolls out of view
+═══════════════════════════ */
+#floatBar{
+  position:fixed;
+  bottom:clamp(20px,4vw,32px);
+  left:50%;transform:translateX(-50%) translateY(80px);
+  z-index:200;
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;
+  background:rgba(22,9,6,.55);
+  backdrop-filter:blur(18px) saturate(1.6);
+  -webkit-backdrop-filter:blur(18px) saturate(1.6);
+  border:.5px solid rgba(201,123,138,.28);
+  border-radius:50px;
+  box-shadow:0 8px 40px rgba(0,0,0,.35),0 0 0 .5px rgba(201,123,138,.1) inset;
+  opacity:0;pointer-events:none;
+  transition:transform .42s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+}
+#floatBar.visible{
+  transform:translateX(-50%) translateY(0);
+  opacity:1;pointer-events:all;
+}
+.fab-btn{
+  position:relative;
+  width:clamp(36px,7vw,44px);height:clamp(36px,7vw,44px);
+  border-radius:50%;border:none;cursor:pointer;
+  background:rgba(201,123,138,.12);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s,transform .18s;
+  color:var(--rose-lt);flex-shrink:0;
+}
+.fab-btn svg{width:clamp(15px,3.2vw,18px);height:clamp(15px,3.2vw,18px);stroke:currentColor;fill:none;stroke-width:1.8}
+.fab-btn:hover{background:rgba(201,123,138,.26);transform:scale(1.08)}
+.fab-btn.active{background:rgba(201,123,138,.32);color:#fff}
+.fab-div{width:.5px;height:20px;background:rgba(201,123,138,.25);border-radius:1px;flex-shrink:0}
+.fab-search-wrap{
+  overflow:hidden;
+  width:0;opacity:0;
+  transition:width .38s cubic-bezier(.22,1,.36,1),opacity .28s ease;
+  display:flex;align-items:center;
+}
+.fab-search-wrap.open{width:clamp(130px,36vw,240px);opacity:1}
+.fab-srch{
+  width:100%;padding:5px 10px;
+  background:transparent;border:none;outline:none;
+  font-family:'EB Garamond',serif;font-size:var(--fs-sm);
+  color:var(--rose-lt);
+}
+.fab-srch::placeholder{color:rgba(201,123,138,.4);font-style:italic}
+.fab-filter-panel{
+  position:absolute;bottom:calc(100% + 12px);left:50%;
+  transform:translateX(-50%) scale(.93) translateY(6px);
+  min-width:190px;
+  background:rgba(18,7,4,.72);
+  backdrop-filter:blur(22px) saturate(1.8);
+  -webkit-backdrop-filter:blur(22px) saturate(1.8);
+  border:.5px solid rgba(201,123,138,.28);
+  border-radius:18px;padding:14px;
+  display:flex;flex-direction:column;gap:8px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease,transform .3s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 16px 48px rgba(0,0,0,.45);
+}
+.fab-filter-panel.open{opacity:1;pointer-events:all;transform:translateX(-50%) scale(1) translateY(0)}
+.fab-filter-label{
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;
+  color:rgba(201,123,138,.5);text-transform:uppercase;padding:0 2px;margin-bottom:2px;
+}
+.fab-fsel{
+  width:100%;padding:8px 28px 8px 12px;
+  border:.5px solid rgba(201,123,138,.25);border-radius:10px;
+  background:rgba(255,255,255,.06);
+  font-family:'Cinzel',serif;font-size:var(--fs-xs);
+  color:rgba(224,168,181,.9);outline:none;cursor:pointer;
+  letter-spacing:.06em;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23c97b8a'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+  transition:border-color .2s,background .2s;
+}
+.fab-fsel:focus,.fab-fsel:hover{border-color:var(--rose);background:rgba(255,255,255,.1)}
 
 /* ═══════════════════════════
    LIBRARY SECTION
@@ -542,6 +635,18 @@ nav.hide{transform:translateY(-100%)}
 .fi:focus{border-color:var(--rose);background:#fff}
 select.fi{appearance:none;-webkit-appearance:none;cursor:pointer}
 
+/* ── Gradient swatch (preserved original) ── */
+.sw-dot.gradient-preserved{
+  background:linear-gradient(135deg,#fdd0b0,#f8b898); /* updated by JS */
+  border-color:var(--rose);
+  position:relative;
+}
+.sw-dot.gradient-preserved::after{
+  content:'~';
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:rgba(0,0,0,.4);font-weight:700;line-height:1;
+}
+
 .sw-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:5px}
 .sw-dot{
   width:26px;height:26px;border-radius:50%;cursor:pointer;
@@ -691,9 +796,8 @@ footer{
     <img src="nav.png" alt="Haa & Bella's Library" class="nav-logo"
          onerror="this.style.display='none';document.querySelector('.nav-logo-fb').style.display='block'">
     <span class="nav-logo-fb">Haa &amp; Bella's Library</span>
-    <button class="nav-add" onclick="openAdd()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Book
+    <button class="nav-add-glass" onclick="openAdd()" title="Add a book">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
   </nav>
 
@@ -737,6 +841,35 @@ footer{
     </div>
   </div>
 
+  <!-- FLOATING GLASS BAR -->
+  <div id="floatBar">
+    <!-- Search -->
+    <div class="fab-search-wrap" id="fabSearchWrap">
+      <input type="text" class="fab-srch" id="fabSrch" placeholder="Search…">
+    </div>
+    <button class="fab-btn" id="fabSearchBtn" title="Search" onclick="toggleFabSearch()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <div class="fab-div"></div>
+    <!-- Filter -->
+    <button class="fab-btn" id="fabFilterBtn" title="Filter" onclick="toggleFabFilter()">
+      <svg viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+    </button>
+    <!-- Filter panel (pops up above) -->
+    <div class="fab-filter-panel" id="fabFilterPanel">
+      <div class="fab-filter-label">Status</div>
+      <select class="fab-fsel" id="fabFStat" onchange="syncFabFilter()">
+        <option value="all">All Books</option>
+        <option value="read">Read</option>
+        <option value="unread">Unread</option>
+      </select>
+      <div class="fab-filter-label">Genre</div>
+      <select class="fab-fsel" id="fabFGenre" onchange="syncFabFilter()">
+        <option value="all">All Genres</option>
+      </select>
+    </div>
+  </div>
+
   <!-- LIBRARY -->
   <section id="library">
     <div class="inner">
@@ -769,7 +902,7 @@ footer{
 <div class="pw-modal-ov" id="pwModalOv">
   <div class="pw-modal">
     <div class="pw-modal-ttl" id="pwModalTtl">Confirm Action</div>
-    <div class="pw-modal-sub" id="pwModalSub">Enter today's access key to proceed.</div>
+    <div class="pw-modal-sub" id="pwModalSub">Enter passkey to proceed.</div>
     <input type="password" class="pw-modal-in" id="pwModalIn" placeholder="••••••••" autocomplete="off">
     <div class="pw-modal-err" id="pwModalErr"></div>
     <div class="pw-modal-btns">
@@ -929,6 +1062,7 @@ function unlockApp(){
     spawnParticles();
     initObs();
     initNavHide();
+    initFloatBar();
     // Load books from Supabase, fall back to local array on error
     await loadFromSupabase();
     renderAll();
@@ -968,11 +1102,9 @@ function togglePwVis(){
   const icon=document.getElementById('eyeIcon');
   if(inp.type==='password'){
     inp.type='text';
-    inp.style.webkitTextSecurity='none';
     icon.innerHTML='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
   } else {
     inp.type='password';
-    inp.style.webkitTextSecurity='';
     icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
 }
@@ -997,8 +1129,9 @@ function submitPwModal(){
   const val=document.getElementById('pwModalIn').value.trim();
   const inp=document.getElementById('pwModalIn');
   if(val===todayKey()){
+    const cb=pwModalCallback;   // capture BEFORE closePwModal nulls it
     closePwModal();
-    if(pwModalCallback) pwModalCallback();
+    if(cb) cb();
   } else {
     inp.classList.remove('shake');
     void inp.offsetWidth;
@@ -1042,6 +1175,92 @@ function initNavHide(){
   },{passive:true});
 }
 
+/* ── Floating glass bar — show when #controls scrolled away ── */
+function initFloatBar(){
+  const bar=document.getElementById('floatBar');
+  const controls=document.getElementById('controls');
+  const fabSrch=document.getElementById('fabSrch');
+
+  // Mirror inline search input into float bar search and vice-versa
+  fabSrch.addEventListener('input',()=>{
+    document.getElementById('srch').value=fabSrch.value;
+    renderAll();
+  });
+
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) bar.classList.add('visible');
+      else {
+        bar.classList.remove('visible');
+        // close panels when bar hides
+        closeFabSearch();
+        closeFabFilter();
+      }
+    });
+  },{threshold:0,rootMargin:'0px'});
+  io.observe(controls);
+
+  // Also hide float bar when footer is visible (prevents overlap)
+  const footer = document.querySelector('footer');
+  if(footer){
+    const footerObs = new IntersectionObserver(entries=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting) bar.classList.remove('visible');
+        else if(window.scrollY > 200) bar.classList.add('visible');
+      });
+    },{threshold:0.05});
+    footerObs.observe(footer);
+  }
+}
+
+function toggleFabSearch(){
+  const wrap=document.getElementById('fabSearchWrap');
+  const btn=document.getElementById('fabSearchBtn');
+  const isOpen=wrap.classList.contains('open');
+  if(isOpen){ closeFabSearch(); }
+  else {
+    closeFabFilter();
+    wrap.classList.add('open');
+    btn.classList.add('active');
+    setTimeout(()=>document.getElementById('fabSrch').focus(),60);
+  }
+}
+function closeFabSearch(){
+  document.getElementById('fabSearchWrap').classList.remove('open');
+  document.getElementById('fabSearchBtn').classList.remove('active');
+}
+function toggleFabFilter(){
+  const panel=document.getElementById('fabFilterPanel');
+  const btn=document.getElementById('fabFilterBtn');
+  const isOpen=panel.classList.contains('open');
+  if(isOpen){ closeFabFilter(); }
+  else {
+    closeFabSearch();
+    panel.classList.add('open');
+    btn.classList.add('active');
+  }
+}
+function closeFabFilter(){
+  document.getElementById('fabFilterPanel').classList.remove('open');
+  document.getElementById('fabFilterBtn').classList.remove('active');
+}
+
+// Sync float bar filter selects → inline selects → re-render
+function syncFabFilter(){
+  document.getElementById('fStat').value=document.getElementById('fabFStat').value;
+  document.getElementById('fGenre').value=document.getElementById('fabFGenre').value;
+  renderAll();
+}
+
+// Close fab panels on outside click
+document.addEventListener('click',e=>{
+  const bar=document.getElementById('floatBar');
+  if(bar && !bar.contains(e.target)){
+    closeFabSearch();
+    closeFabFilter();
+  }
+});
+
 /* ── Scroll observer ── */
 function initObs(){
   const obs=new IntersectionObserver(entries=>{
@@ -1060,6 +1279,18 @@ function initObs(){
     s.onclick=()=>{activeCl=c;document.querySelectorAll('.sw-dot').forEach(x=>x.classList.remove('on'));s.classList.add('on')};
     w.appendChild(s);
   });
+  // Slot for gradient-preserved swatch (hidden until editing a gradient-color book)
+  const gSlot=document.createElement('div');
+  gSlot.className='sw-dot gradient-preserved';
+  gSlot.id='gradientSwatch';
+  gSlot.style.display='none';
+  gSlot.title='Keep original colour';
+  gSlot.onclick=()=>{
+    activeCl=gSlot._gradientValue;
+    document.querySelectorAll('.sw-dot').forEach(x=>x.classList.remove('on'));
+    gSlot.classList.add('on');
+  };
+  w.appendChild(gSlot);
 })();
 
 /* ── Render ── */
@@ -1077,6 +1308,13 @@ function updGenres(){
   const gs=[...new Set(books.map(b=>b.genre).filter(Boolean))].sort();
   sel.innerHTML='<option value="all">All Genres</option>';
   gs.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;if(g===cur)o.selected=true;sel.appendChild(o)});
+  // Mirror into fab filter panel genre select
+  const fabSel=document.getElementById('fabFGenre');
+  if(fabSel){
+    const fabCur=fabSel.value;
+    fabSel.innerHTML='<option value="all">All Genres</option>';
+    gs.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;if(g===fabCur)o.selected=true;fabSel.appendChild(o)});
+  }
 }
 function renderAll(){
   updGenres();
@@ -1094,7 +1332,14 @@ function renderAll(){
 function renderShelf(id,arr){
   const el=document.getElementById(id);
   el.innerHTML='';
-  if(!arr.length){el.innerHTML='<div class="empty-shelf"><p>Nothing here yet ✨</p></div>';return}
+  if(!arr.length){
+    const q=document.getElementById('srch').value.trim();
+    const fs=document.getElementById('fStat').value;
+    const fg=document.getElementById('fGenre').value;
+    const isFiltered=q||fs!=='all'||fg!=='all';
+    el.innerHTML=`<div class="empty-shelf"><p>${isFiltered?'No books match your search ✨':'Nothing here yet ✨'}</p></div>`;
+    return;
+  }
   arr.forEach((b,i)=>{
     const card=document.createElement('div');
     card.className='book-card';
@@ -1143,13 +1388,29 @@ function openAdd(){
   document.getElementById('mTtl').textContent='Add a new book';
   ['iTitle','iAuth','iGenre'].forEach(x=>document.getElementById(x).value='');
   document.getElementById('iStat').value='unread';
+  // Hide gradient swatch slot for new books; select first flat colour
+  const gSlot=document.getElementById('gradientSwatch');
+  gSlot.style.display='none';
   setCol(COLORS[0]);
   document.getElementById('addOv').classList.add('open');
 }
 function closeAdd(){document.getElementById('addOv').classList.remove('open')}
 function setCol(c){
   activeCl=c;
-  document.querySelectorAll('.sw-dot').forEach(s=>s.classList.toggle('on',s.style.background===c||rgb2h(s.style.background)===c));
+  const isGradient=c&&c.startsWith('linear-gradient');
+  const gSlot=document.getElementById('gradientSwatch');
+  if(isGradient){
+    // Show the preserved-gradient swatch and select it
+    gSlot.style.display='';
+    gSlot.style.background=c;
+    gSlot._gradientValue=c;
+    document.querySelectorAll('.sw-dot').forEach(s=>s.classList.remove('on'));
+    gSlot.classList.add('on');
+  } else {
+    // Hide gradient slot, select matching flat swatch
+    gSlot.style.display='none';
+    document.querySelectorAll('.sw-dot').forEach(s=>s.classList.toggle('on',s.style.background===c||rgb2h(s.style.background)===c));
+  }
 }
 function saveBook(){
   const t=document.getElementById('iTitle').value.trim();
@@ -1163,7 +1424,7 @@ function saveBook(){
     if(!bRef)return;
     openPwModal(
       'Save Changes',
-      `Enter the passkey to save changes to "${bRef.title}".`,
+      `Enter passkey to save changes to "${bRef.title}".`,
       ()=>{
         Object.assign(bRef,{title:t,author:a,genre:g,status:s,color:activeCl});
         closeAdd();
@@ -1176,7 +1437,7 @@ function saveBook(){
     // adding new book requires date-key
     openPwModal(
       'Add to the Shelf',
-      'Enter the passkey to add this book.',
+      'Enter passkey to add this book.',
       ()=>{
         const newBook={id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl};
         books.push(newBook);
@@ -1221,7 +1482,7 @@ function editDet(){
   closeDet();
   openPwModal(
     'Edit Book',
-    `Enter the passkey to edit "${b.title}".`,
+    `Enter passkey to edit "${b.title}".`,
     ()=>{
       editId=b.id;
       document.getElementById('mTtl').textContent='Edit Book';
@@ -1239,7 +1500,7 @@ function delBook(){
   closeDet();
   openPwModal(
     'Remove from Shelf',
-    `Enter the passkey to remove "${b.title}".`,
+    `Enter passkey to remove "${b.title}".`,
     ()=>{
       sbDelete(viewId);
       books=books.filter(x=>x.id!==viewId);
@@ -1289,21 +1550,57 @@ async function loadFromSupabase(){
 // Insert a new book row — Supabase assigns the id, we sync it back
 async function sbInsert(book){
   try{
-    const payload={title:book.title,author:book.author,genre:book.genre,status:book.status,color:book.color};
+    // Do NOT send id — let Supabase serial column auto-assign it
+    const payload={title:book.title,author:book.author,genre:book.genre||'',status:book.status,color:book.color};
+    console.log('[sbInsert] Sending payload:', payload);
     const res = await fetch(SUPABASE_URL+'/rest/v1/books', {
       method:'POST',
       headers: SB_HEADERS,
       body: JSON.stringify(payload)
     });
-    if(!res.ok){ console.error('Insert failed:', await res.text()); return; }
-    const rows = await res.json();
-    if(rows && rows[0] && rows[0].id){
-      // update local book id to match what Supabase assigned
+    const rawText = await res.text();
+    console.log('[sbInsert] HTTP status:', res.status, '| Body:', rawText);
+    if(!res.ok){
+      console.error('[sbInsert] Insert failed:', rawText);
+      showToast('Add failed ('+res.status+') — open DevTools console for details.');
+      return;
+    }
+    // Parse response — Supabase returns the inserted row when Prefer: return=representation is set
+    let rows;
+    try{ rows = JSON.parse(rawText); } catch(_){ rows = []; }
+    console.log('[sbInsert] Parsed rows:', rows);
+    if(Array.isArray(rows) && rows[0] && rows[0].id){
       book.id = rows[0].id;
       nextId = Math.max(nextId, rows[0].id + 1);
-      renderAll(); // re-render so clicks use the correct DB id
+      renderAll();
+      console.log('[sbInsert] Book synced with DB id:', book.id);
+    } else {
+      // Insert succeeded but no row returned — re-fetch to get the real id
+      console.warn('[sbInsert] No row returned, re-fetching from DB...');
+      await reloadLatestBook(book);
     }
-  } catch(e){ console.error('sbInsert error:', e); }
+  } catch(e){
+    console.error('[sbInsert] Network/parse error:', e);
+    showToast('Network error — could not save to database.');
+  }
+}
+
+// Fallback: if insert succeeded but returned no row, re-fetch the last inserted book by title
+async function reloadLatestBook(book){
+  try{
+    const res = await fetch(
+      SUPABASE_URL+'/rest/v1/books?title=eq.'+encodeURIComponent(book.title)+'&order=id.desc&limit=1',
+      { headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY} }
+    );
+    if(!res.ok) return;
+    const rows = await res.json();
+    if(rows && rows[0] && rows[0].id){
+      book.id = rows[0].id;
+      nextId = Math.max(nextId, rows[0].id + 1);
+      renderAll();
+      console.log('[reloadLatestBook] Synced DB id:', book.id);
+    }
+  } catch(e){ console.warn('[reloadLatestBook] failed:', e); }
 }
 
 // Update an existing book row by id
@@ -1312,9 +1609,9 @@ async function sbUpdate(book){
     const res = await fetch(SUPABASE_URL+'/rest/v1/books?id=eq.'+book.id, {
       method:'PATCH',
       headers: SB_HEADERS,
-      body: JSON.stringify({title:book.title,author:book.author,genre:book.genre,status:book.status,color:book.color})
+      body: JSON.stringify({title:book.title,author:book.author,genre:book.genre||'',status:book.status,color:book.color})
     });
-    if(!res.ok){ console.error('Update failed:', await res.text()); }
+    if(!res.ok){ const e=await res.text(); console.error('Update failed:',e); showToast('Update failed — check console.'); }
   } catch(e){ console.error('sbUpdate error:', e); }
 }
 
@@ -1325,7 +1622,7 @@ async function sbDelete(id){
       method:'DELETE',
       headers: SB_HEADERS
     });
-    if(!res.ok){ console.error('Delete failed:', await res.text()); }
+    if(!res.ok){ const e=await res.text(); console.error('Delete failed:',e); showToast('Delete failed — check console.'); }
   } catch(e){ console.error('sbDelete error:', e); }
 }
 </script>
