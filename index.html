@@ -816,9 +816,148 @@ footer{position:relative}
   filter:brightness(2) saturate(1.8) drop-shadow(0 0 8px rgba(201,123,138,.7));
   transition:filter .4s ease;
 }
+
+/* ═══════════════════════════
+   EASTER EGG — STARS (nav logo)
+═══════════════════════════ */
+.star-burst{
+  position:fixed;
+  pointer-events:none;
+  z-index:9998;
+  font-size:0px;
+  opacity:0;
+  animation:starFly linear forwards;
+  color:#f5d88a;
+  text-shadow:0 0 6px rgba(245,216,138,.8);
+}
+@keyframes starFly{
+  0%  {opacity:0;  transform:translate(0,0)        scale(0.2) rotate(0deg);}
+  18% {opacity:1;  transform:translate(var(--sx),var(--sy)) scale(1.1) rotate(var(--sr));}
+  60% {opacity:.85;}
+  100%{opacity:0;  transform:translate(var(--ex),var(--ey)) scale(0.5) rotate(var(--er)) ;}
+}
+
+/* ═══════════════════════════
+   EASTER EGG — DEDICATION CARD (#4)
+═══════════════════════════ */
+#dedicationOv{
+  position:fixed;inset:0;z-index:10000;
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem;
+  background:rgba(12,4,2,0);
+  pointer-events:none;
+  transition:background .45s ease;
+}
+#dedicationOv.open{
+  background:rgba(12,4,2,.72);
+  pointer-events:all;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+#dedicationCard{
+  position:relative;
+  width:min(320px,88vw);
+  padding:2.4rem 2.2rem 2.8rem;
+  background:#f5ede0;
+  opacity:0;
+  transform:scale(.84) translateY(18px) rotate(-1.5deg);
+  transition:opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);
+
+  /* torn/aged paper feel */
+  filter:sepia(.18) brightness(.97);
+  box-shadow:
+    0 8px 40px rgba(0,0,0,.55),
+    0 2px 8px rgba(0,0,0,.3),
+    inset 0 0 60px rgba(160,110,60,.08);
+
+  /* torn edges via SVG clip-path — jagged on all four sides */
+  clip-path: polygon(
+    0% 2%, 2% 0%, 5% 1.5%, 8% 0%, 12% 2%, 15% 0.5%, 19% 2%, 23% 0%,
+    27% 1.8%, 31% 0.3%, 35% 1.5%, 40% 0%, 45% 2%, 50% 0.5%,
+    55% 1.8%, 60% 0%, 65% 2%, 70% 0.5%, 75% 1.5%, 80% 0%,
+    85% 2%, 90% 0.5%, 94% 1.8%, 97% 0%, 100% 2%,
+    99% 20%, 100% 35%, 98.5% 50%, 100% 65%, 99% 80%, 100% 95%, 98% 100%,
+    94% 98.5%, 90% 100%, 85% 98%, 80% 100%, 75% 98.5%, 70% 100%,
+    65% 98%, 60% 100%, 55% 98.5%, 50% 100%, 45% 98%, 40% 100%,
+    35% 98.5%, 30% 100%, 25% 98%, 20% 100%, 15% 98.5%, 10% 100%,
+    5% 98%, 2% 100%, 0% 98%,
+    1% 80%, 0% 65%, 1.5% 50%, 0% 35%, 1% 20%
+  );
+}
+#dedicationOv.open #dedicationCard{
+  opacity:1;
+  transform:scale(1) translateY(0) rotate(-1deg);
+}
+
+/* aged paper texture lines */
+#dedicationCard::before{
+  content:'';
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 27px,
+    rgba(160,120,80,.07) 27px,
+    rgba(160,120,80,.07) 28px
+  );
+  pointer-events:none;
+}
+
+/* faint left margin line like a real letter */
+#dedicationCard::after{
+  content:'';
+  position:absolute;
+  left:44px;top:0;bottom:0;width:.5px;
+  background:rgba(201,123,138,.2);
+}
+
+.ded-flourish{
+  text-align:center;
+  font-size:1.5rem;
+  color:rgba(201,123,138,.5);
+  letter-spacing:.3em;
+  margin-bottom:1.1rem;
+  font-family:'Cormorant Garamond',serif;
+}
+.ded-text{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(1.15rem,4vw,1.35rem);
+  color:#3a2010;
+  line-height:1.85;
+  text-align:center;
+  letter-spacing:.01em;
+  position:relative;z-index:1;
+  margin-bottom:1.4rem;
+}
+.ded-sig{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:clamp(1rem,3.5vw,1.15rem);
+  color:rgba(180,80,80,.7);
+  text-align:right;
+  letter-spacing:.04em;
+  position:relative;z-index:1;
+  margin-right:.5rem;
+}
+.ded-close-hint{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;
+  color:rgba(100,60,30,.3);text-transform:uppercase;
+}
 </style>
 </head>
 <body>
+
+<!-- DEDICATION CARD OVERLAY -->
+<div id="dedicationOv" onclick="closeDedication()">
+  <div id="dedicationCard" onclick="event.stopPropagation()">
+    <div class="ded-flourish">✦ · ✦ · ✦</div>
+    <p class="ded-text">For Haa<br>with Lots of Love.</p>
+    <p class="ded-sig">— T</p>
+    <span class="ded-close-hint">tap anywhere to close</span>
+  </div>
+</div>
 
 <!-- GATE / LOGIN -->
 <div id="gate">
@@ -843,7 +982,7 @@ footer{position:relative}
 <div id="app">
 
   <nav id="nav">
-    <img src="nav.png" alt="Haa & Bella's Library" class="nav-logo"
+    <img src="nav.png" alt="Haa & Bella's Library" class="nav-logo" id="navLogo" onclick="starTap()"
          onerror="this.style.display='none';document.querySelector('.nav-logo-fb').style.display='block'">
     <span class="nav-logo-fb">Haa &amp; Bella's Library</span>
     <button class="nav-add-glass" onclick="openAdd()" title="Add a book">
@@ -943,7 +1082,7 @@ footer{position:relative}
 
   <footer id="footerEl">
     <img src="logo.png" alt="Haa & Bella's Library" class="footer-logo" id="footerLogo" onerror="this.style.display='none'" onclick="eggTap()">
-    <p class="footer-copy">made with love · Haa &amp; Bella's personal collection 🌸</p>
+    <p class="footer-copy" id="footerCopy" onclick="dedicationTap()">made with love · Haa &amp; Bella's personal collection 🌸</p>
   </footer>
 
 </div><!-- #app -->
@@ -1818,6 +1957,90 @@ async function sbDelete(id){
         }, dur * 1000 + 5000);
 
       }, i * 42 + Math.random() * 55);
+    }
+  }
+})();
+
+/* ═══════════════════════════
+   EASTER EGG #4 — DEDICATION CARD (triple-tap "made with love")
+═══════════════════════════ */
+(function(){
+  let dedTaps=0, dedTimer=null;
+  window.dedicationTap = function(){
+    clearTimeout(dedTimer);
+    dedTaps++;
+    dedTimer = setTimeout(()=>{ dedTaps=0; }, 1100);
+    if(dedTaps >= 3){
+      dedTaps=0; clearTimeout(dedTimer);
+      openDedication();
+    }
+  };
+  window.openDedication = function(){
+    document.getElementById('dedicationOv').classList.add('open');
+  };
+  window.closeDedication = function(){
+    document.getElementById('dedicationOv').classList.remove('open');
+  };
+  // Also close on Escape
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDedication(); });
+})();
+
+/* ═══════════════════════════
+   EASTER EGG #5 — STARS (4× tap nav logo)
+═══════════════════════════ */
+(function(){
+  let starTaps=0, starTimer=null;
+  window.starTap = function(){
+    clearTimeout(starTimer);
+    starTaps++;
+    starTimer = setTimeout(()=>{ starTaps=0; }, 1000);
+    if(starTaps >= 4){
+      starTaps=0; clearTimeout(starTimer);
+      burstStars();
+    }
+  };
+
+  function burstStars(){
+    const logo = document.getElementById('navLogo');
+    if(!logo) return;
+    const r = logo.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top  + r.height/2;
+
+    // Star chars — mix of sizes and symbols
+    const chars = ['✦','✧','★','⋆','✸','✺','✵','·'];
+    const count = 18;
+
+    for(let i=0; i<count; i++){
+      setTimeout(()=>{
+        const s = document.createElement('div');
+        s.className = 'star-burst';
+
+        const ch   = chars[Math.floor(Math.random()*chars.length)];
+        const sz   = 10 + Math.random()*14;
+        const ang  = (Math.PI*2/count)*i + (Math.random()-.5)*.6;
+        const dist1= 18  + Math.random()*22;   // how far it snaps to first
+        const dist2= 55  + Math.random()*70;   // how far it drifts to end
+        const sx   = Math.cos(ang)*dist1;
+        const sy   = Math.sin(ang)*dist1;
+        const ex   = Math.cos(ang)*dist2;
+        const ey   = Math.sin(ang)*dist2;
+        const sr   = (Math.random()-.5)*60;
+        const er   = (Math.random()-.5)*180;
+        const dur  = .55 + Math.random()*.45;
+
+        s.textContent = ch;
+        s.style.cssText = `
+          left:${cx}px; top:${cy}px;
+          font-size:${sz}px;
+          --sx:${sx}px; --sy:${sy}px;
+          --ex:${ex}px; --ey:${ey}px;
+          --sr:${sr}deg; --er:${er}deg;
+          animation-duration:${dur}s;
+        `;
+        document.body.appendChild(s);
+        setTimeout(()=> s.remove(), dur*1000+60);
+      }, i*28 + Math.random()*20);
     }
   }
 })();
