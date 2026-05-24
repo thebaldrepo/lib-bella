@@ -425,7 +425,7 @@ nav.hide{transform:translateY(-100%)}
     radial-gradient(ellipse 40% 50% at 80% 70%,rgba(255,190,150,.2) 0%,transparent 55%);
   pointer-events:none;
 }
-.books-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;min-height:155px;padding-bottom:6px}
+.books-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:center;min-height:155px;padding-bottom:6px}
 .empty-shelf{width:100%;min-height:130px;display:flex;align-items:center;justify-content:center}
 .empty-shelf p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:var(--fs-base);color:rgba(160,100,60,.5)}
 
@@ -836,9 +836,8 @@ footer{
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── Supabase config (replace before deploying) ── */
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://kxpxzeyuiygiopzkghny.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4cHh6ZXl1aXlnaW96cGtoa255Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1OTkwOTgsImV4cCI6MjA5NTE3NTA5OH0.9vDusZ6e80nT2w3nVj0TUT3OggXn2hWGVh3jvMLGRkY';
 
 const COLORS=[
   '#f2b8b8','#e8a0c0','#c8a8e8','#a8c4e8','#a8d8b8',
@@ -905,6 +904,8 @@ let books=[
   {id:41,title:'The Magic of Thinking Big',            author:'David J. Schwartz',                     genre:'Self-Help / Motivation',       status:'read', color:'linear-gradient(135deg,#fcd4b0,#f4b888)'},
   {id:42,title:'You Can Win',                          author:'Shiv Khera',                            genre:'Self-Help / Motivation',       status:'read', color:'linear-gradient(135deg,#fbd0ac,#f0b484)'},
 ];
+/* NOTE: localBooks is the fallback only — Supabase is the source of truth.
+   On load, books[] is replaced with DB data. */
 let nextId=43,editId=null,viewId=null,activeCl=COLORS[0];
 
 /* ── Gate / Login ── */
@@ -921,13 +922,15 @@ function todayKey(){
 function unlockApp(){
   const gate=document.getElementById('gate');
   gate.classList.add('out');
-  setTimeout(()=>{
+  setTimeout(async ()=>{
     gate.style.display='none';
     const app=document.getElementById('app');
     app.style.display='block';
     spawnParticles();
     initObs();
     initNavHide();
+    // Load books from Supabase, fall back to local array on error
+    await loadFromSupabase();
     renderAll();
     requestAnimationFrame(()=>{
       document.querySelectorAll('.fade-in').forEach((el,i)=>
@@ -1139,6 +1142,7 @@ function saveBook(){
       `Enter the passkey to save changes to "${bRef.title}".`,
       ()=>{
         Object.assign(bRef,{title:t,author:a,genre:g,status:s,color:activeCl});
+        sbUpdate(bRef);
         showToast('Book updated ✓');
         closeAdd();renderAll();
       }
@@ -1149,7 +1153,9 @@ function saveBook(){
       'Add to the Shelf',
       'Enter the passkey to add this book.',
       ()=>{
-        books.push({id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl});
+        const newBook={id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl};
+        books.push(newBook);
+        sbInsert(newBook);
         showToast('Book added to the shelf ✓');
         closeAdd();renderAll();
       }
@@ -1179,9 +1185,10 @@ function closeDet(){document.getElementById('detOv').classList.remove('open')}
 function toggleStatus(){
   const b=books.find(x=>x.id===viewId);if(!b)return;
   b.status=b.status==='read'?'unread':'read';
-  closeDet();renderAll();
+  sbUpdate(b);
+  closeDet();
+  renderAll();
   showToast(b.status==='read'?'Marked as read ✓':'Moved to want-to-read');
-  setTimeout(()=>openDet(viewId),80);
 }
 function editDet(){
   const b=books.find(x=>x.id===viewId);if(!b)return;
@@ -1208,6 +1215,7 @@ function delBook(){
     'Remove from Shelf',
     `Enter the passkey to remove "${b.title}".`,
     ()=>{
+      sbDelete(viewId);
       books=books.filter(x=>x.id!==viewId);
       renderAll();
       showToast('Book removed from the shelf.');
@@ -1224,17 +1232,67 @@ function showToast(m){
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function rgb2h(r){const m=(r||'').match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);return m?'#'+[m[1],m[2],m[3]].map(x=>parseInt(x).toString(16).padStart(2,'0')).join(''):r||''}
 
-/* ── Supabase stub ── */
-async function syncToSupabase(){
-  if(SUPABASE_URL==='YOUR_SUPABASE_URL')return;
+/* ═══════════════════════════
+   SUPABASE INTEGRATION
+═══════════════════════════ */
+const SB_HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+// Load all books from Supabase on startup
+async function loadFromSupabase(){
   try{
-    await fetch(SUPABASE_URL+'/rest/v1/books',{
-      method:'POST',
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify(books)
+    const res = await fetch(SUPABASE_URL+'/rest/v1/books?select=*&order=id.asc', {
+      headers: {'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
     });
-    showToast('Synced ✓');
-  }catch(e){console.error(e)}
+    if(!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    if(data && data.length>0){
+      books = data;
+      nextId = Math.max(...data.map(b=>b.id)) + 1;
+    }
+    // else keep local fallback array
+  } catch(e){
+    console.warn('Supabase load failed, using local data:', e);
+  }
+}
+
+// Insert a new book row
+async function sbInsert(book){
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/books', {
+      method:'POST',
+      headers: SB_HEADERS,
+      body: JSON.stringify(book)
+    });
+    if(!res.ok){ console.error('Insert failed:', await res.text()); }
+  } catch(e){ console.error('sbInsert error:', e); }
+}
+
+// Update an existing book row by id
+async function sbUpdate(book){
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/books?id=eq.'+book.id, {
+      method:'PATCH',
+      headers: SB_HEADERS,
+      body: JSON.stringify({title:book.title,author:book.author,genre:book.genre,status:book.status,color:book.color})
+    });
+    if(!res.ok){ console.error('Update failed:', await res.text()); }
+  } catch(e){ console.error('sbUpdate error:', e); }
+}
+
+// Delete a book row by id
+async function sbDelete(id){
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/books?id=eq.'+id, {
+      method:'DELETE',
+      headers: SB_HEADERS
+    });
+    if(!res.ok){ console.error('Delete failed:', await res.text()); }
+  } catch(e){ console.error('sbDelete error:', e); }
 }
 </script>
 </body>
