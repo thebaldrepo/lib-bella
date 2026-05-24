@@ -940,11 +940,7 @@ footer{position:relative}
   position:relative;z-index:1;
   margin-right:.5rem;
 }
-.ded-close-hint{
-  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
-  font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;
-  color:rgba(100,60,30,.3);text-transform:uppercase;
-}
+
 </style>
 </head>
 <body>
@@ -955,7 +951,6 @@ footer{position:relative}
     <div class="ded-flourish">✦ · ✦ · ✦</div>
     <p class="ded-text">For Haa<br>with Lots of Love.</p>
     <p class="ded-sig">— T</p>
-    <span class="ded-close-hint">tap anywhere to close</span>
   </div>
 </div>
 
@@ -1977,6 +1972,8 @@ async function sbDelete(id){
   };
   window.openDedication = function(){
     document.getElementById('dedicationOv').classList.add('open');
+    clearTimeout(window._dedAutoClose);
+    window._dedAutoClose = setTimeout(()=> closeDedication(), 5000);
   };
   window.closeDedication = function(){
     document.getElementById('dedicationOv').classList.remove('open');
