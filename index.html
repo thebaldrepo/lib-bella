@@ -728,7 +728,7 @@ footer{
       </div>
       <select class="fsel" id="fStat" onchange="renderAll()">
         <option value="all">All Books</option>
-        <option value="read">Read ✓</option>
+        <option value="read">Read</option>
         <option value="unread">Unread</option>
       </select>
       <select class="fsel" id="fGenre" onchange="renderAll()">
@@ -792,7 +792,7 @@ footer{
     <div class="ff"><label class="fl">Genre</label><input type="text" class="fi" id="iGenre" placeholder="e.g. Fantasy, Romance…"></div>
     <div class="ff">
       <label class="fl">Status</label>
-      <select class="fi" id="iStat"><option value="unread">Want to Read</option><option value="read">Already Read ✓</option></select>
+      <select class="fi" id="iStat"><option value="unread">Want to Read</option><option value="read">Already Read</option></select>
     </div>
     <div class="ff"><label class="fl">Spine Colour</label><div class="sw-row" id="swatches"></div></div>
     <div class="mbtns"><button class="bs" onclick="closeAdd()">Cancel</button><button class="bp" onclick="saveBook()">Save Book</button></div>
@@ -1096,20 +1096,44 @@ function renderShelf(id,arr){
   el.innerHTML='';
   if(!arr.length){el.innerHTML='<div class="empty-shelf"><p>Nothing here yet ✨</p></div>';return}
   arr.forEach((b,i)=>{
-    const c=document.createElement('div');
-    c.className='book-card';
-    c.style.animationDelay=(i*.05)+'s';
-    c.onclick=()=>openDet(b.id);
-    c.innerHTML=`
-      <div class="book-body" style="background:${b.color}">
-        <div class="shimmer"></div>
-        <div class="sdot ${b.status}"></div>
-        <div class="bt">${esc(b.title)}</div>
-        <div class="ba">${esc(b.author)}</div>
-      </div>
-      ${b.genre?`<div class="bg-pill">${esc(b.genre)}</div>`:''}
-    `;
-    el.appendChild(c);
+    const card=document.createElement('div');
+    card.className='book-card';
+    card.style.animationDelay=(i*.05)+'s';
+    card.onclick=()=>openDet(b.id);
+
+    // build book body — set background via JS to avoid HTML escaping gradient strings
+    const body=document.createElement('div');
+    body.className='book-body';
+    body.style.background=b.color||'linear-gradient(135deg,#fdd0b0,#f8b898)';
+
+    const shimmer=document.createElement('div');
+    shimmer.className='shimmer';
+
+    const dot=document.createElement('div');
+    dot.className='sdot '+(b.status||'read');
+
+    const titleEl=document.createElement('div');
+    titleEl.className='bt';
+    titleEl.textContent=b.title||'';
+
+    const authEl=document.createElement('div');
+    authEl.className='ba';
+    authEl.textContent=b.author||'';
+
+    body.appendChild(shimmer);
+    body.appendChild(dot);
+    body.appendChild(titleEl);
+    body.appendChild(authEl);
+    card.appendChild(body);
+
+    if(b.genre){
+      const pill=document.createElement('div');
+      pill.className='bg-pill';
+      pill.textContent=b.genre;
+      card.appendChild(pill);
+    }
+
+    el.appendChild(card);
   });
 }
 
@@ -1142,9 +1166,10 @@ function saveBook(){
       `Enter the passkey to save changes to "${bRef.title}".`,
       ()=>{
         Object.assign(bRef,{title:t,author:a,genre:g,status:s,color:activeCl});
-        sbUpdate(bRef);
+        closeAdd();
+        renderAll();
         showToast('Book updated ✓');
-        closeAdd();renderAll();
+        sbUpdate(bRef);
       }
     );
   } else {
@@ -1155,9 +1180,10 @@ function saveBook(){
       ()=>{
         const newBook={id:nextId++,title:t,author:a,genre:g,status:s,color:activeCl};
         books.push(newBook);
-        sbInsert(newBook);
+        closeAdd();
+        renderAll();
         showToast('Book added to the shelf ✓');
-        closeAdd();renderAll();
+        sbInsert(newBook); // async — updates newBook.id with DB value when done
       }
     );
   }
@@ -1172,9 +1198,9 @@ function openDet(id){
   const ge=document.getElementById('dGenre');
   if(b.genre){ge.textContent=b.genre;ge.style.display='inline-block'}else ge.style.display='none';
   const bd=document.getElementById('dBadge');
-  bd.textContent=b.status==='read'?'✓ Read':'○ Want to Read';
+  bd.textContent=b.status==='read'?'Read':'Want to Read';
   bd.className='dbadge '+b.status;
-  document.getElementById('dTogLbl').textContent=b.status==='read'?'Mark Unread':'Mark Read';
+  document.getElementById('dTogLbl').textContent=b.status==='read'?'Mark as Unread':'Mark as Read';
   const cov=document.getElementById('dCov');
   cov.style.background=b.color;
   cov.innerHTML=`<span>${esc(b.title)}</span>`;
@@ -1188,7 +1214,7 @@ function toggleStatus(){
   sbUpdate(b);
   closeDet();
   renderAll();
-  showToast(b.status==='read'?'Marked as read ✓':'Moved to want-to-read');
+  showToast(b.status==='read'?'Marked as read':'Moved to want-to-read');
 }
 function editDet(){
   const b=books.find(x=>x.id===viewId);if(!b)return;
@@ -1260,15 +1286,23 @@ async function loadFromSupabase(){
   }
 }
 
-// Insert a new book row
+// Insert a new book row — Supabase assigns the id, we sync it back
 async function sbInsert(book){
   try{
+    const payload={title:book.title,author:book.author,genre:book.genre,status:book.status,color:book.color};
     const res = await fetch(SUPABASE_URL+'/rest/v1/books', {
       method:'POST',
       headers: SB_HEADERS,
-      body: JSON.stringify(book)
+      body: JSON.stringify(payload)
     });
-    if(!res.ok){ console.error('Insert failed:', await res.text()); }
+    if(!res.ok){ console.error('Insert failed:', await res.text()); return; }
+    const rows = await res.json();
+    if(rows && rows[0] && rows[0].id){
+      // update local book id to match what Supabase assigned
+      book.id = rows[0].id;
+      nextId = Math.max(nextId, rows[0].id + 1);
+      renderAll(); // re-render so clicks use the correct DB id
+    }
   } catch(e){ console.error('sbInsert error:', e); }
 }
 
